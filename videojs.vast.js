@@ -142,6 +142,21 @@
               });
             },
             errorFn = function() {
+              // Check if we can try another source
+              if (!player.vastTracker.impressed && player.vast.sources.length > 1) {
+                var failedSrc = player.currentSrc();
+                var sources = player.vast.sources.filter(function (item) {
+                  return (item.src !== failedSrc)
+                });
+                if (sources.length < player.vast.sources.length) {
+                  player.vast.sources = sources;
+                  // TODO: use setImmediate
+                  return setTimeout(function () {
+                    player.src(player.vast.sources);
+                  }, 1);
+                }
+              }
+
               // Inform ad server we couldn't play the media file for this ad
               vast.util.track(player.vastTracker.ad.errorURLTemplates, {ERRORCODE: 405});
               errorOccurred = true;
